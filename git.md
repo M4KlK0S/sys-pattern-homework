@@ -138,19 +138,6 @@ git push origin main
 ```
 Вывод:
 
-text
-Enumerating objects: 5, done.
-Counting objects: 100% (5/5), done.
-Writing objects: 100% (3/3), 275 bytes | 275.00 KiB/s, done.
-Total 3 (delta 0), reused 0 (delta 0)
-To https://github.com/<username>/git-practice-1.git
-   7a1b2c3..4f3c2a1  main -> main
-Если в вашем репозитории ветка называется master, команда будет:
+<img width="969" height="261" alt="image" src="https://github.com/user-attachments/assets/7f8cb4af-828f-40fd-9bdb-f0572dfc184d" />
 
-bash
-git push origin master
-Переименовать ветку можно командой:
-
-bash
-git branch -M main
 Проверка: открыл страницу репозитория на GitHub — файл README.md содержит новые строки, история коммитов показывает First commit.
