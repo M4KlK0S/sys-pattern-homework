@@ -163,3 +163,157 @@ git push origin main
 <img width="969" height="261" alt="image" src="https://github.com/user-attachments/assets/7f8cb4af-828f-40fd-9bdb-f0572dfc184d" />
 
 Проверка: открыл страницу репозитория на GitHub — файл README.md содержит новые строки, история коммитов показывает First commit.
+
+## Задание 2
+
+Что нужно сделать:
+
+1. Создайте файл .gitignore (обратите внимание на точку в начале файла) и проверьте его статус сразу после создания.
+2. Добавьте файл .gitignore в следующий коммит git add....
+3. Напишите правила в этом файле, чтобы игнорировать любые файлы .pyc, а также все файлы в директории cache.
+4. Сделайте коммит и пуш.
+
+В качестве ответа добавьте ссылку на этот коммит в ваш md-файл с решением.
+
+## Решение 2
+
+**1. Создание файла .gitignore**
+
+Важно: файл начинается с точки — это скрытый файл, и в проводнике Windows он по умолчанию не виден.
+
+Создаём пустой файл в PowerShell:
+```powershell
+New-Item -Path .gitignore -ItemType File
+```
+Ожидаемый вывод:
+
+<img width="905" height="185" alt="image" src="https://github.com/user-attachments/assets/04a3e313-1075-4c66-8319-e61f7e0c20d4" />
+
+Проверить, что файл создан:
+```powershell
+Get-ChildItem -Force
+```
+<img width="728" height="224" alt="image" src="https://github.com/user-attachments/assets/90e62d0b-4de6-4561-9883-45c6107b4cad" />
+
+Флаг -Force показывает скрытые файлы (те, что начинаются с точки).
+
+**2. Проверка статуса сразу после создания**
+```powershell
+git status
+```
+Ожидаемый вывод:
+
+<img width="688" height="182" alt="image" src="https://github.com/user-attachments/assets/bdd237d4-5ac7-4b19-ace7-0e86845ff404" />
+
+Что это значит: Git видит новый файл .gitignore, но пока не отслеживает его — файл в состоянии Untracked. Это нормально: любой новый файл начинается именно так.
+
+**3. Написать правила в .gitignore**
+
+Открываем файл в Блокноте:
+```powershell
+notepad .gitignore
+```
+Добавляем два правила:
+```text
+# Игнорировать все скомпилированные Python-файлы
+*.pyc
+
+# Игнорировать всё содержимое директории cache
+cache/
+```
+Пояснения:
+- *.pyc — игнорирует любые файлы, оканчивающиеся на .pyc, в любой папке проекта (сюда попадают .pyc, .pyo, скомпилированный байт-код Python).
+- cache/ — слэш в конце указывает, что это директория. Git будет игнорировать всё содержимое папки cache в корне проекта. Если нужно игнорировать cache в любой вложенной папке — используйте **/cache/.
+- Сохраните (Ctrl+S) и закройте Блокнот.
+
+Проверьте содержимое:
+```powershell
+Get-Content .gitignore
+```
+
+**4. Добавить .gitignore в индекс**
+```powershell
+git add .gitignore
+
+# Проверьте статус:
+git status
+```
+Ожидаемый вывод:
+
+<img width="636" height="147" alt="image" src="https://github.com/user-attachments/assets/2d19dcb2-085c-471e-bc06-f5ce02c76d47" />
+
+Файл перешёл в состояние Staged.
+
+**5. Коммит**
+```powershell
+git commit -m "Add .gitignore with rules for *.pyc and cache/"
+```
+Ожидаемый вывод:
+
+<img width="1082" height="126" alt="image" src="https://github.com/user-attachments/assets/a3f02f89-dc64-422f-85a7-47c86ba8cffd" />
+
+Запомните хэш коммита — он понадобится для ссылки. Узнать в любой момент:
+```powershell
+git rev-parse HEAD
+git log --oneline -1
+```
+**6. Push на GitHub**
+```powershell
+git push origin main
+```
+Ожидаемый вывод:
+
+<img width="734" height="244" alt="image" src="https://github.com/user-attachments/assets/0bcd410e-37ff-4dd1-bea3-3ecf019663b6" />
+
+💡 Если push снова отклонён с fetch first — значит, на GitHub появился новый коммит (например, вы правили README через веб-интерфейс). Сделайте:
+
+```powershell
+git pull origin main
+git push origin main
+```
+При конфликте — разрешите, как в Задании 1.
+
+**7. Проверка**
+
+Локально:
+```powershell
+git status
+```
+<img width="646" height="124" alt="image" src="https://github.com/user-attachments/assets/81a0c6d0-91d8-4628-a652-b9ac16129d8f" />
+
+```powershell
+git log --oneline -3
+```
+Пример вывода:
+
+<img width="861" height="85" alt="image" src="https://github.com/user-attachments/assets/ddf57947-207a-45d5-9bb6-acc0430c4ac3" />
+
+На GitHub: откройте https://github.com/M4KlK0S/git-practice-1 — в корне должен появиться файл .gitignore с вашими правилами.
+
+**8. Проверка, что .gitignore реально работает (необязательно, но полезно)**
+
+Создайте тестовый файл, который должен игнорироваться:
+```powershell
+New-Item -Path test.pyc -ItemType File
+New-Item -Path cache -ItemType Directory -Force
+New-Item -Path .\cache\data.txt -ItemType File
+```
+Теперь проверьте статус:
+```powershell
+git status
+```
+Убедиться, что Git действительно игнорирует:
+```powershell
+git check-ignore -v test.pyc cache/data.txt
+```
+Ожидаемый вывод:
+
+<img width="933" height="58" alt="image" src="https://github.com/user-attachments/assets/2ac28df1-f50e-4932-ad17-6189f067327b" />
+
+— Git показывает, какое именно правило сработало.
+
+Удалите тестовые файлы, чтобы не засорять проект:
+```powershell
+Remove-Item test.pyc -Force
+Remove-Item cache -Recurse -Force
+```
