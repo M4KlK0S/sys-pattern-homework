@@ -1,5 +1,3 @@
-<img width="853" height="168" alt="image" src="https://github.com/user-attachments/assets/e69377ba-2518-4281-992c-ef218b9bc81f" /># git-practice-1
-
 **1. Регистрация аккаунта на GitHub**
 
 Выполнено ранее. Аккаунт GitHub уже зарегистрирован, веду собственные репозитории.
