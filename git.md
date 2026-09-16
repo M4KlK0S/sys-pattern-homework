@@ -317,3 +317,280 @@ git check-ignore -v test.pyc cache/data.txt
 Remove-Item test.pyc -Force
 Remove-Item cache -Recurse -Force
 ```
+## Задание 3
+
+Что нужно сделать:
+1. Создайте новую ветку dev и переключитесь на неё.
+2. Создайте в ветке dev файл test.sh с произвольным содержимым.
+3. Сделайте несколько коммитов и пушей в ветку dev, имитируя активную работу над файлом в процессе разработки.
+4. Переключитесь на основную ветку.
+5. Добавьте файл main.sh в основной ветке с произвольным содержимым, сделайте комит и пуш . Так имитируется продолжение общекомандной разработки в основной ветке во время разработки отдельного функционала в dev ветке.
+6. Сделайте мердж dev ветки в основную с помощью git merge dev. Напишите осмысленное сообщение в появившееся окно комита.
+7. Сделайте пуш в основной ветке.
+8. Не удаляйте ветку dev.
+
+В качестве ответа прикрепите ссылку на граф коммитов https://github.com/ваш-логин/ваш-репозиторий/network в ваш md-файл с решением.
+
+Ваш граф комитов должен выглядеть аналогично скриншоту:
+
+<img width="245" height="104" alt="image" src="https://github.com/user-attachments/assets/9b976a58-ecf4-439e-ad6a-1b4c6f965c47" />
+
+В качестве ответа добавьте ссылку на этот коммит в ваш md-файл с решением.
+
+## Решение 3
+
+**1. Создание ветки dev и переключение на неё**
+
+Вариант через git checkout (классический, работает везде):
+```powershell
+git checkout -b dev
+```
+Вариант через git switch (современный, Git 2.23+):
+```powershell
+git switch -c dev
+```
+Ожидаемый вывод:
+
+<img width="720" height="43" alt="image" src="https://github.com/user-attachments/assets/5ca4ed18-c515-4c0a-a7d0-337693bcdf1c" />
+
+Проверьте, что вы на dev:
+```powershell
+git branch
+```
+<img width="633" height="60" alt="image" src="https://github.com/user-attachments/assets/c0840724-e845-4138-95d1-a2a548f0a56c" />
+
+Флаг -b (или -c в switch) означает «создать и сразу переключиться».
+
+**2. Создание файла test.sh с произвольным содержимым**
+```powershell
+@"
+#!/bin/bash
+# Скрипт для тестирования функционала dev-ветки
+echo "Hello from dev branch!"
+echo "Разработка продолжается..."
+"@ | Set-Content -Path test.sh -Encoding UTF8
+```
+Проверка:
+```powershell
+Get-Content test.sh
+```
+<img width="726" height="116" alt="image" src="https://github.com/user-attachments/assets/e0098964-1fbc-46c4-86e9-100f88ce0317" />
+
+Статус:
+```powershell
+git status
+```
+<img width="692" height="142" alt="image" src="https://github.com/user-attachments/assets/1ad88c47-fd3e-4b67-b281-2e701e260937" />
+
+**3. Несколько коммитов и пушей в dev (имитация активной работы)**
+
+Первый коммит:
+```powershell
+git add test.sh
+git commit -m "Add initial test.sh"
+git push -u origin dev
+```
+Флаг -u (--set-upstream) связывает локальную ветку dev с удалённой origin/dev — дальше можно писать просто git push.
+
+Ожидаемый вывод push:
+<img width="899" height="401" alt="image" src="https://github.com/user-attachments/assets/fba7399d-1589-4f3f-b61a-d32c6ac061ea" />
+
+Второй коммит — вносим изменения в test.sh:
+```powershell
+@"
+#!/bin/bash
+# Скрипт для тестирования функционала dev-ветки
+echo "Hello from dev branch!"
+echo "Разработка продолжается..."
+echo "Вторая итерация: добавлена новая функциональность"
+"@ | Set-Content -Path test.sh -Encoding UTF8
+
+git add test.sh
+git commit -m "Extend test.sh with new functionality"
+git push
+```
+Ожидаемый вывод push:
+<img width="1028" height="441" alt="image" src="https://github.com/user-attachments/assets/14ba8207-6f8a-4bed-a45a-3773e5eb8176" />
+
+Третий коммит — ещё одна итерация:
+```powershell
+Add-Content -Path test.sh -Value 'echo "Третья итерация: bugfix и улучшения"'
+git add test.sh
+git commit -m "Fix bugs and improve test.sh"
+git push
+```
+Ожидаемый вывод push:
+<img width="1080" height="339" alt="image" src="https://github.com/user-attachments/assets/ea0935ba-c7c7-450c-940e-e7e7f0e055d0" />
+
+Проверка истории в dev:
+```powershell
+git log --oneline -5
+```
+Пример:
+<img width="790" height="124" alt="image" src="https://github.com/user-attachments/assets/35b1bf43-d2c5-4fd9-bf1e-7b0af86980c6" />
+
+**4. Переключение на основную ветку main**
+```powershell
+git checkout main
+```
+или
+```powershell
+git switch main
+```
+Ожидаемый вывод:
+<img width="701" height="61" alt="image" src="https://github.com/user-attachments/assets/0ec0edc9-78ad-45c9-9e0f-13d38d1fdb7a" />
+
+**5. Создание main.sh в основной ветке + коммит + push**
+```powershell
+@"
+#!/bin/bash
+# Основной скрипт проекта
+echo "Main project script running..."
+echo "Общекомандная разработка продолжается"
+"@ | Set-Content -Path main.sh -Encoding UTF8
+
+git add main.sh
+git commit -m "Add main.sh in main branch"
+git push origin main
+```
+Ожидаемый вывод push:
+
+text
+To https://github.com/M4KlK0S/git-practice-1.git
+   528bf75..e5f6a7b  main -> main
+Проверка статуса:
+
+powershell
+git status
+Ветка main впереди origin/main ровно на 1 коммит (тот, который вы только что запушили), затем — up to date.
+
+Шаг 6. Мердж ветки dev в main
+Убедитесь, что вы на main:
+
+powershell
+git branch
+Звёздочка должна быть напротив main.
+
+Выполните:
+
+powershell
+git merge dev
+Возможны два исхода:
+
+А. Fast-forward (без конфликтов) — если main не менялся после ответвления
+text
+Updating 528bf75..b3c4d5e
+Fast-forward
+ test.sh | 5 +++++
+ 1 file changed, 5 insertions(+)
+ create mode 100644 test.sh
+Тогда merge-коммит не создаётся, а main просто перематывается на последний коммит dev.
+
+Б. Merge-коммит (как на скриншоте) — если в main уже был свой коммит (main.sh)
+Так как вы сделали коммит Add main.sh в main после ответвления dev, история разошлась. Git создаст merge-коммит и откроет редактор для сообщения:
+
+text
+Merge made by the 'ort' strategy.
+ test.sh | 5 +++++
+ 1 file changed, 5 insertions(+)
+ create mode 100644 test.sh
+В окне редактора (vim или Notepad) напишите осмысленное сообщение, например:
+
+text
+Merge dev into main: завершена разработка test.sh
+Сохраните и закройте:
+
+vim: Esc, затем :wq, Enter.
+
+Notepad: Ctrl+S, закрыть окно.
+
+💡 Если хотите, чтобы вместо vim открывался Блокнот:
+
+powershell
+git config --global core.editor notepad
+Либо задайте сообщение сразу, без редактора:
+
+powershell
+git merge dev -m "Merge dev into main: завершена разработка test.sh"
+Проверьте историю:
+
+powershell
+git log --oneline --graph --all -10
+Пример вывода (аналогично скриншоту):
+
+text
+*   c1d2e3f (HEAD -> main) Merge dev into main: завершена разработка test.sh
+|\
+| * b3c4d5e (dev, origin/dev) Fix bugs and improve test.sh
+| * a2b3c4d Extend test.sh with new functionality
+| * f1e2d3c Add initial test.sh
+* | e5f6a7b (origin/main) Add main.sh in main branch
+|/
+* 528bf75 Merge remote changes and resolve conflict in README
+Именно такой граф вы увидите на странице https://github.com/M4KlK0S/git-practice-1/network.
+
+Шаг 7. Push в основной ветке
+powershell
+git push origin main
+Ожидаемый вывод:
+
+text
+Enumerating objects: 6, done.
+Counting objects: 100% (6/6), done.
+Writing objects: 100% (4/4), done.
+Total 4 (delta 0), reused 0 (delta 0)
+To https://github.com/M4KlK0S/git-practice-1.git
+   e5f6a7b..c1d2e3f  main -> main
+Шаг 8. Не удалять ветку dev
+Ничего делать не нужно — просто не выполняйте git branch -d dev или git push origin --delete dev. Ветка dev останется и локально, и на GitHub.
+
+Проверка, что ветка на месте:
+
+powershell
+git branch -a
+text
+* main
+  dev
+  remotes/origin/dev
+  remotes/origin/main
+Ссылка на граф коммитов
+Откройте в браузере:
+
+text
+https://github.com/M4KlK0S/git-practice-1/network
+Это официальная страница GitHub, которая визуализирует историю ветвления в виде графа. Ваш граф должен показать:
+
+Ветку dev, ответвившуюся от main.
+
+Три коммита в dev.
+
+Один коммит в main (Add main.sh), сделанный параллельно.
+
+Merge-коммит, который соединяет обе ветки.
+
+Это точь-в-точь соответствует скриншоту из задания.
+
+Добавление ссылки в md-файл с решением
+Откройте ваш файл с решением и добавьте:
+
+markdown
+## Задание 3
+
+**Ссылка на граф коммитов:** https://github.com/M4KlK0S/git-practice-1/network
+
+**Структура веток:**
+- `main` — основная ветка
+- `dev` — ветка разработки, сохранена (не удалена)
+
+**Ключевые коммиты:**
+- Add initial test.sh
+- Extend test.sh with new functionality
+- Fix bugs and improve test.sh
+- Add main.sh in main branch
+- Merge dev into main
+Затем закоммитьте и запушьте:
+
+powershell
+git add README.md
+git commit -m "Add solution link for task 3"
+git push origin main
