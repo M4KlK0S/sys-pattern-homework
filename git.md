@@ -393,6 +393,7 @@ git push -u origin dev
 Флаг -u (--set-upstream) связывает локальную ветку dev с удалённой origin/dev — дальше можно писать просто git push.
 
 Ожидаемый вывод push:
+
 <img width="899" height="401" alt="image" src="https://github.com/user-attachments/assets/fba7399d-1589-4f3f-b61a-d32c6ac061ea" />
 
 Второй коммит — вносим изменения в test.sh:
@@ -410,6 +411,7 @@ git commit -m "Extend test.sh with new functionality"
 git push
 ```
 Ожидаемый вывод push:
+
 <img width="1028" height="441" alt="image" src="https://github.com/user-attachments/assets/14ba8207-6f8a-4bed-a45a-3773e5eb8176" />
 
 Третий коммит — ещё одна итерация:
@@ -420,6 +422,7 @@ git commit -m "Fix bugs and improve test.sh"
 git push
 ```
 Ожидаемый вывод push:
+
 <img width="1080" height="339" alt="image" src="https://github.com/user-attachments/assets/ea0935ba-c7c7-450c-940e-e7e7f0e055d0" />
 
 Проверка истории в dev:
@@ -427,6 +430,7 @@ git push
 git log --oneline -5
 ```
 Пример:
+
 <img width="790" height="124" alt="image" src="https://github.com/user-attachments/assets/35b1bf43-d2c5-4fd9-bf1e-7b0af86980c6" />
 
 **4. Переключение на основную ветку main**
@@ -438,6 +442,7 @@ git checkout main
 git switch main
 ```
 Ожидаемый вывод:
+
 <img width="701" height="61" alt="image" src="https://github.com/user-attachments/assets/0ec0edc9-78ad-45c9-9e0f-13d38d1fdb7a" />
 
 **5. Создание main.sh в основной ветке + коммит + push**
@@ -455,142 +460,10 @@ git push origin main
 ```
 Ожидаемый вывод push:
 
-text
-To https://github.com/M4KlK0S/git-practice-1.git
-   528bf75..e5f6a7b  main -> main
+<img width="927" height="302" alt="image" src="https://github.com/user-attachments/assets/25abf439-00bd-43ec-b09f-0c304599a1a1" />
+
 Проверка статуса:
-
-powershell
+```powershell
 git status
+```
 Ветка main впереди origin/main ровно на 1 коммит (тот, который вы только что запушили), затем — up to date.
-
-Шаг 6. Мердж ветки dev в main
-Убедитесь, что вы на main:
-
-powershell
-git branch
-Звёздочка должна быть напротив main.
-
-Выполните:
-
-powershell
-git merge dev
-Возможны два исхода:
-
-А. Fast-forward (без конфликтов) — если main не менялся после ответвления
-text
-Updating 528bf75..b3c4d5e
-Fast-forward
- test.sh | 5 +++++
- 1 file changed, 5 insertions(+)
- create mode 100644 test.sh
-Тогда merge-коммит не создаётся, а main просто перематывается на последний коммит dev.
-
-Б. Merge-коммит (как на скриншоте) — если в main уже был свой коммит (main.sh)
-Так как вы сделали коммит Add main.sh в main после ответвления dev, история разошлась. Git создаст merge-коммит и откроет редактор для сообщения:
-
-text
-Merge made by the 'ort' strategy.
- test.sh | 5 +++++
- 1 file changed, 5 insertions(+)
- create mode 100644 test.sh
-В окне редактора (vim или Notepad) напишите осмысленное сообщение, например:
-
-text
-Merge dev into main: завершена разработка test.sh
-Сохраните и закройте:
-
-vim: Esc, затем :wq, Enter.
-
-Notepad: Ctrl+S, закрыть окно.
-
-💡 Если хотите, чтобы вместо vim открывался Блокнот:
-
-powershell
-git config --global core.editor notepad
-Либо задайте сообщение сразу, без редактора:
-
-powershell
-git merge dev -m "Merge dev into main: завершена разработка test.sh"
-Проверьте историю:
-
-powershell
-git log --oneline --graph --all -10
-Пример вывода (аналогично скриншоту):
-
-text
-*   c1d2e3f (HEAD -> main) Merge dev into main: завершена разработка test.sh
-|\
-| * b3c4d5e (dev, origin/dev) Fix bugs and improve test.sh
-| * a2b3c4d Extend test.sh with new functionality
-| * f1e2d3c Add initial test.sh
-* | e5f6a7b (origin/main) Add main.sh in main branch
-|/
-* 528bf75 Merge remote changes and resolve conflict in README
-Именно такой граф вы увидите на странице https://github.com/M4KlK0S/git-practice-1/network.
-
-Шаг 7. Push в основной ветке
-powershell
-git push origin main
-Ожидаемый вывод:
-
-text
-Enumerating objects: 6, done.
-Counting objects: 100% (6/6), done.
-Writing objects: 100% (4/4), done.
-Total 4 (delta 0), reused 0 (delta 0)
-To https://github.com/M4KlK0S/git-practice-1.git
-   e5f6a7b..c1d2e3f  main -> main
-Шаг 8. Не удалять ветку dev
-Ничего делать не нужно — просто не выполняйте git branch -d dev или git push origin --delete dev. Ветка dev останется и локально, и на GitHub.
-
-Проверка, что ветка на месте:
-
-powershell
-git branch -a
-text
-* main
-  dev
-  remotes/origin/dev
-  remotes/origin/main
-Ссылка на граф коммитов
-Откройте в браузере:
-
-text
-https://github.com/M4KlK0S/git-practice-1/network
-Это официальная страница GitHub, которая визуализирует историю ветвления в виде графа. Ваш граф должен показать:
-
-Ветку dev, ответвившуюся от main.
-
-Три коммита в dev.
-
-Один коммит в main (Add main.sh), сделанный параллельно.
-
-Merge-коммит, который соединяет обе ветки.
-
-Это точь-в-точь соответствует скриншоту из задания.
-
-Добавление ссылки в md-файл с решением
-Откройте ваш файл с решением и добавьте:
-
-markdown
-## Задание 3
-
-**Ссылка на граф коммитов:** https://github.com/M4KlK0S/git-practice-1/network
-
-**Структура веток:**
-- `main` — основная ветка
-- `dev` — ветка разработки, сохранена (не удалена)
-
-**Ключевые коммиты:**
-- Add initial test.sh
-- Extend test.sh with new functionality
-- Fix bugs and improve test.sh
-- Add main.sh in main branch
-- Merge dev into main
-Затем закоммитьте и запушьте:
-
-powershell
-git add README.md
-git commit -m "Add solution link for task 3"
-git push origin main
