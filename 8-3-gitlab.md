@@ -120,15 +120,9 @@ docker run -d --name gitlab-runner --restart always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   gitlab/gitlab-runner:latest
 ```
-**9. Проверка и скриншоты**
+**9. Проверка**
 
 В GitLab: Settings → CI/CD → Runners — Runner должен быть Online (зелёная точка).
-
-Приложи в README.md:
-
-Скриншот списка runner'ов со статусом Online
-
-Скриншот деталей runner'а (tags, executor, URL)
 
 ## Задание 2. Пуш в GitLab и создание .gitlab-ci.yml
 
