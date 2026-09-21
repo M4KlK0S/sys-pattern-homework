@@ -64,33 +64,37 @@
 
 **2.1. Где настраивать**
 
-NS домена mk-industrias.online = ns1.reg.ru — значит, все записи добавляются в панели Reg.ru.
+NS домена mk-industrias.online = ns1.reg.ru, все внешние DNS-записи добавляются в панели Reg.ru.
 
-ispmanager создаёт локальную зону, которая не видна из интернета.
+> [!WARNING]
+> - ispmanager создаёт локальную зону, которая не видна из интернета.
+> - Поэтому все записи, которые должны быть видны снаружи (A, MX, TXT, DKIM, DMARC, SPF), нужно дублировать у регистратора.
 
-**3.2. Зайди в панель Reg.ru**
+**2.2. Зайди в панель Reg.ru**
 
 Открой reg.ru → личный кабинет → найди mk-industrias.online → Управление зоной.
 
-**3.3. Добавь A-записи**
+**2.3. Добавление DNS записей**
 
-| Тип | Имя | Для чего добавляется |
-|---|---|---|
-| TXT | _acme-challenge | Подтверждение владения доменом для выпуска SSL-сертификата Let's Encrypt (DNS-валидация) |
-| TXT | _acme-challenge.mail | Подтверждение владения поддоменом mail для выпуска SSL-сертификата Let's Encrypt (DNS-валидация) |
-| TXT | _dmarc | Политика обработки писем, не прошедших SPF/DKIM. Указывает, что делать с подозрительными письмами от домена |
-| A | @ | Основной IP-адрес домена. На него приходит входящая почта и открывается сайт |
-| MX | @ | Адрес почтового сервера, куда доставлять входящую почту для домена |
-| TXT | @ | SPF-запись: список серверов, которым разрешено отправлять почту от имени домена |
-| TXT | dkim._domainkey | Публичный ключ DKIM: по нему получатели проверяют цифровую подпись писем |
-| A | mail | IP-адрес почтового сервера (на него указывает MX-запись) |
-| A | pop | IP-адрес сервера для получения почты по протоколу POP3 |
-| A | smtp | IP-адрес сервера для отправки почты по протоколу SMTP |
-| A | www | IP-адрес для доступа к сайту по имени www.mk-industrias.online |
+| Тип | Имя | Значение | Для чего |
+|---|---|---|---|
+| A | @ | \<PUBLIC_IP\> | Основной IP: сайт и приём почты |
+| A | mail | \<PUBLIC_IP\> | IP почтового сервера (на него указывает MX) |
+| A | pop | \<PUBLIC_IP\> | Получение почты по POP3 |
+| A | smtp | \<PUBLIC_IP\> | Отправка почты по SMTP |
+| A | www | \<PUBLIC_IP\> | Доступ к сайту по www.mk-industrias.online |
+| MX | @ | mail.mk-industrias.online (приоритет 10) | Куда доставлять входящую почту |
+| TXT | @ | v=spf1 a mx ip4:\<PUBLIC_IP\> ~all | SPF: кто имеет право отправлять от имени домена |
+| TXT | dkim._domainkey | (публичный ключ из ispmanager) | DKIM: проверка подписи писем |
+| TXT | _dmarc | v=DMARC1; p=quarantine; rua=mailto:info@mk-industrias.online | Политика для писем без SPF/DKIM |
 
-## 4. Выпуск SSL-сертификата
+> [!IMPORTANT]
+> - PTR-запись настраивается у хостера, который выдал вам <PUBLIC_IP> (не в Reg.ru!).
+> - Значение PTR = mail.mk-industrias.online. Без PTR Gmail/Яндекс будут отклонять письма.
 
-**4.1. Выпуск**
+## 3. Выпуск SSL-сертификата
+
+**3.1. Выпуск**
 
 Где: ispmanager → SSL-сертификаты → Создать → Let's Encrypt.
 
@@ -103,31 +107,47 @@ ispmanager создаёт локальную зону, которая не ви�
 
 <img width="2228" height="218" alt="image" src="https://github.com/user-attachments/assets/8f19b6d0-3177-41cb-82ae-670bf1b99d14" />
 
-4.2. Применение
+**3.2. Применение**
+
 Где: Почта → Почтовые домены → mk-industrias.online → Изменить.
 
 В поле SSL-сертификат выбери выпущенный. Сохрани.
 
 <img width="448" height="157" alt="image" src="https://github.com/user-attachments/assets/6752a381-37f6-43af-a86b-b5e381de7989" />
 
-## 5. Проверка почты онлайн-инструментами
+## 4. Проверка почты онлайн-инструментами
+```
+# A-записи
+dig +short mk-industrias.online A
+dig +short mail.mk-industrias.online A
+dig +short pop.mk-industrias.online A
+dig +short smtp.mk-industrias.online A
 
-- dig +short mk-industrias.online A
-- dig +short mk-industrias.online MX
-- dig +short mail.mk-industrias.online A
-- dig +short mk-industrias.online TXT
-- dig +short dkim._domainkey.mk-industrias.online TXT
-- dig +short _dmarc.mk-industrias.online TXT
-- dig +short mk-industrias.online NS
-- dig +short mk-industrias.online SOA
-- dig +short -x 84.201.131.194
-- host mk-industrias.online
-- host mail.mk-industrias.online
-- curl -fsSIL --max-time 5 https://mk-industrias.online/
+# MX
+dig +short mk-industrias.online MX
 
-## 6. Настройка фильтров и автоответчика
+# TXT: SPF, DKIM, DMARC
+dig +short mk-industrias.online TXT
+dig +short dkim._domainkey.mk-industrias.online TXT
+dig +short _dmarc.mk-industrias.online TXT
 
-**6.1. Автоответчик**
+# NS и SOA
+dig +short mk-industrias.online NS
+dig +short mk-industrias.online SOA
+
+# Обратная зона (PTR) — проверяем для <PUBLIC_IP>
+dig +short -x <PUBLIC_IP>
+
+# Универсальные проверки
+host mk-industrias.online
+host mail.mk-industrias.online
+
+# Доступность HTTPS
+curl -fsSIL --max-time 5 https://mk-industrias.online/
+```
+## 5. Настройка фильтров и автоответчика
+
+**5.1. Автоответчик**
 
 Где: ispmanager → Почта → info@mk-industrias.online → Автоответчик.
 
@@ -140,7 +160,7 @@ ispmanager создаёт локальную зону, которая не ви�
 
 <img width="559" height="721" alt="image" src="https://github.com/user-attachments/assets/8258b8bf-8e7e-446a-9cf5-2c801b07670f" />
 
-**6.2. Фильтр**
+**5.2. Фильтр**
 
 **a. Новый почтовый сортировщик**
 
@@ -183,7 +203,7 @@ ispmanager создаёт локальную зону, которая не ви�
 ```
 Письмо, у которого в теме есть слово «спам», не попадёт во «Входящие» — Exim/Sieve удалит его сразу при приёме.
 
-**6.3. Проверка через Roundcube**
+**5.3. Проверка через Roundcube**
 
 Проверка через Roundcube
 
