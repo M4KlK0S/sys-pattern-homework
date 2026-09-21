@@ -92,6 +92,30 @@ NS домена mk-industrias.online = ns1.reg.ru, все внешние DNS-з�
 > - PTR-запись настраивается у хостера, который выдал вам <PUBLIC_IP> (не в Reg.ru!).
 > - Значение PTR = mail.mk-industrias.online. Без PTR Gmail/Яндекс будут отклонять письма.
 
+2.4. Настройка PTR-записи (Yandex Cloud)
+
+PTR настраивается не в Reg.ru, а на стороне хостера публичного IP. Для YC:
+
+Требования:
+- публичная DNS-зона (делегирование на NS YC не обязательно);
+- актуальный yc CLI (yc components update).
+
+Шаги:
+a. Создать публичную DNS-зону в YC (стоимость — по правилам тарификации).
+
+b. Выполнить:
+```bash
+yc vpc address update <ID_IP_адреса> \
+  --dns-record ptr=true,fqdn=mail.mk-industrias.online.,dns-zone=<ID_DNS_зоны>
+```
+> [!WARNING]
+> Точка в конце fqdn обязательна: mail.mk-industrias.online. — иначе имя будет воспринято как поддомен относительно зоны.
+
+c. Проверка:
+```bash
+dig +short -x <PUBLIC_IP>
+# ожидаем: mail.mk-industrias.online.
+```
 ## 3. Выпуск SSL-сертификата
 
 **3.1. Выпуск**
