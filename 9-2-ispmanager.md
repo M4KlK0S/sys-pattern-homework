@@ -94,17 +94,50 @@ NS домена mk-industrias.online = ns1.reg.ru, все внешние DNS-з�
 
 **2.4. Настройка PTR-записи (Yandex Cloud)**
 
-PTR настраивается не в Reg.ru, а на стороне хостера публичного IP. Для YC:
+PTR-запись настраивается не в Reg.ru, а на стороне хостера публичного IP. 
 
-Требования:
-- публичная DNS-зона (делегирование на NS YC не обязательно);
-- актуальный yc CLI (yc components update).
+В нашем случае сервер находится в Yandex Cloud, поэтому используем yc CLI.
 
-Шаги:
+> [!IMPORTANT]
+> A/MX/TXT-записи домена `mk-industrias.online` обслуживаются NS-серверами Reg.ru — домен делегирован на них. Публичная DNS-зона в YC используется **только** как «контейнер» для привязки PTR-записи к IP. Если делегировать домен на NS Yandex Cloud, все A/MX/TXT-записи придётся переносить в YC.
 
-a. Создать публичную DNS-зону в YC (стоимость — по правилам тарификации).
+> [!WARNING]
+> - PTR можно задать только для статического (reserved) IP-адреса. Для динамического (ephemeral) YC выдаёт ошибку:
+> - Address ... is dynamic (ephemeral). DNS settings should be set for the Compute instance network interface, not for the Address itself.
 
-b. Выполнить:
+a. Проверить текущий статус IP
+```bash
+yc vpc address list
+```
+Найти строку, где `EXTERNAL_IPV4_ADDRESS` совпадает с `<PUBLIC_IP>`, и запомнить её `ID` — это и есть `<ID_IP_адреса>`.
+
+В нашем случае публичный IP <ID_IP_адреса> имеет RESERVED = false (динамический).
+
+b. Сделать IP статическим
+```bash
+yc vpc address update --reserved=true <ID_IP_адреса>
+```
+Проверьте, что RESERVED стал true:
+```bash
+yc vpc address list
+```
+Теперь адрес закреплён за вами и не изменится при перезапуске ВМ.
+
+c. Убедиться, что публичная DNS-зона создана
+```bash
+yc dns zone list
+```
+Нужна зона с VISIBILITY = PUBLIC. Если её нет — создайте:
+```bash
+yc dns zone create \
+  --name mk-industrias-public \
+  --zone mk-industrias.online. \
+  --public-visibility
+```
+> [!IMPORTANT]
+> Создание публичной DNS-зоны в YC — платная услуга (тарифицируется по правилам YC).
+
+d. Привязать PTR к статическому IP
 ```bash
 yc vpc address update <ID_IP_адреса> \
   --dns-record ptr=true,fqdn=mail.mk-industrias.online.,dns-zone=<ID_DNS_зоны>
@@ -112,11 +145,21 @@ yc vpc address update <ID_IP_адреса> \
 > [!WARNING]
 > Точка в конце fqdn обязательна: mail.mk-industrias.online. — иначе имя будет воспринято как поддомен относительно зоны.
 
-c. Проверка:
+Разбор параметров:
+
+| Параметр | Значение | Пояснение |
+|---|---|---|
+| \<ID_IP_адреса\> | \<ID_IP_адреса\> | ID публичного IP из `yc vpc address list` |
+| ptr=true | — | Включаем PTR-запись |
+| fqdn | mail.mk-industrias.online. | Имя, на которое будет резолвиться IP |
+| dns-zone | \<ID_DNS_зоны\> | ID публичной DNS-зоны из `yc dns zone list` |
+
+e. Проверка
 ```bash
 dig +short -x <PUBLIC_IP>
 # ожидаем: mail.mk-industrias.online.
 ```
+
 ## 3. Выпуск SSL-сертификата
 
 **3.1. Выпуск**
@@ -141,7 +184,7 @@ dig +short -x <PUBLIC_IP>
 <img width="448" height="157" alt="image" src="https://github.com/user-attachments/assets/6752a381-37f6-43af-a86b-b5e381de7989" />
 
 ## 4. Проверка почты онлайн-инструментами
-```
+```bash
 # A-записи
 dig +short mk-industrias.online A
 dig +short mail.mk-industrias.online A
@@ -226,7 +269,7 @@ curl -fsSIL --max-time 5 https://mk-industrias.online/
 ЕСЛИ тема письма СОДЕРЖИТ "спам"
 ТО сохранить в директорию Junk (спам)
 ```
-Письмо, у которого в теме есть слово «спам», не попадёт во «Входящие» — Exim/Sieve удалит его сразу при приёме.
+Письмо, у которого в теме есть слово «спам», не попадёт во «Входящие» — Exim/Sieve сохранит его сразу при приёме в Junk (спам).
 
 **5.3. Проверка через Roundcube**
 
